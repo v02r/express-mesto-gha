@@ -20,14 +20,12 @@ module.exports.createCard = (req, res) => {
   const owner = req.user._id;
 
   Card.create({ name, link, owner })
-    .then((card) =>
-      res.status(200).send({
-        name: card.name,
-        link: card.link,
-        owner: card.owner,
-        _id: card._id,
-      })
-    )
+    .then((card) => res.status(200).send({
+      name: card.name,
+      link: card.link,
+      owner: card.owner,
+      _id: card._id,
+    }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return res.status(ERR_BAD_REQUEST).send({
@@ -61,7 +59,7 @@ module.exports.likeCard = (req, res) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
-    { new: true }
+    { new: true },
   )
     .then((card) => {
       if (!card) {
@@ -84,7 +82,7 @@ module.exports.dislikeCard = (req, res) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } },
-    { new: true }
+    { new: true },
   )
     .then((card) => {
       if (!card) {

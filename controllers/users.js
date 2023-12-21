@@ -62,7 +62,7 @@ module.exports.updateUser = (req, res) => {
     {
       new: true,
       runValidators: true,
-    }
+    },
   )
     .then((user) => res.status(200).send(user))
     .catch((err) => {
@@ -83,7 +83,7 @@ module.exports.updateAvatar = (req, res) => {
     {
       new: true,
       runValidators: true,
-    }
+    },
   )
     .then((user) => res.status(200).send(user))
     .catch((err) => {
