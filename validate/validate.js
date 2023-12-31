@@ -53,8 +53,20 @@ const validateCardInfo = celebrate({
 });
 
 module.exports = {
-  validateURL, validateDBID, validateUserId, validateUser, validateUserPatch, validateUserAvatar, validateCardInfo,
+  validateURL,
+  validateDBID,
+  validateUserId,
+  validateUser,
+  validateUserPatch,
+  validateUserAvatar,
+  validateCardInfo,
 };
 
-
 // 659148b08d603d0cba87801e
+
+// {
+//   "name": "test card",
+//   "link": "https://cdn.create.vista.com/api/media/small/483841144/stock-photo-old-oak-tree-growing-agricultural-field-spring-sunset-sky",
+//   "owner": "659148b08d603d0cba87801e",
+//   "_id": "65914dffca9eacba23cc70b8"
+// }

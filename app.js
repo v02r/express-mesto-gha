@@ -24,14 +24,6 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// app.use((req, res, next) => {
-//   req.user = {
-//     _id: '657f17f98b85deb059a4f180', // вставьте сюда _id созданного в предыдущем пункте пользователя
-//   };
-
-//   next();
-// });
-
 app.post('/signin', validateUser, login);
 app.post('/signup', validateUser, createUser);
 

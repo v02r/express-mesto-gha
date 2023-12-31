@@ -35,13 +35,13 @@ module.exports.createCard = (req, res, next) => {
 };
 
 module.exports.deleteCard = (req, res, next) => {
-  Card.findById(req.params.cardId)
+  Card.findById(req.params.id)
     .orFail(() => {
       throw new NotFoundErr('Карточка не найдена');
     })
     .then(({ owner }) => {
       if (owner.toString() === req.user._id) {
-        Card.findByIdAndDelete(req.params.cardId).then((card) => {
+        Card.findByIdAndDelete(req.params.id).then((card) => {
           res.status(200).send(card);
         });
       } else {
@@ -59,7 +59,7 @@ module.exports.deleteCard = (req, res, next) => {
 
 module.exports.likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
-    req.params.cardId,
+    req.params.id,
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
