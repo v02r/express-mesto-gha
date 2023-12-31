@@ -1,21 +1,20 @@
 const Card = require('../models/card');
-const {
-  ERR_BAD_REQUEST,
-  ERR_DEFAULT,
-  ERR_NOT_FOUND,
-} = require('../errors/errors');
+const IternalErr = require('../errors/IternalErr');
+const BadRequestErr = require('../errors/BadRequestErr');
+const NotFoundErr = require('../errors/NotFoundErr');
+const ForbiddenErr = require('../errors/ForbiddenErr');
 
-module.exports.getCards = (req, res) => {
+module.exports.getCards = (req, res, next) => {
   Card.find({})
     .then((cards) => {
       res.status(200).send(cards);
     })
     .catch(() => {
-      res.status(ERR_DEFAULT).send({ message: 'Что-то пошло не так' });
+      next(new IternalErr());
     });
 };
 
-module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
   const owner = req.user._id;
 
@@ -27,35 +26,38 @@ module.exports.createCard = (req, res) => {
       _id: card._id,
     }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(ERR_BAD_REQUEST).send({
-          message: 'Данные введены некорректно',
-        });
+      if (err.name === 'CastError' || err.name === 'ValidationError') {
+        next(new BadRequestErr('Ошибка создания карточки. Переданы некорректные данные'));
+      } else {
+        next(err);
       }
-      return res.status(ERR_DEFAULT).send({ message: 'Что-то пошло не так' });
     });
 };
 
-module.exports.deleteCard = (req, res) => {
-  Card.findByIdAndDelete(req.params.cardId)
-    .then((card) => {
-      if (!card) {
-        res.status(ERR_NOT_FOUND).send({ message: 'Карточка не найдена' });
-        return;
+module.exports.deleteCard = (req, res, next) => {
+  Card.findById(req.params.cardId)
+    .orFail(() => {
+      throw new NotFoundErr('Карточка не найдена');
+    })
+    .then(({ owner }) => {
+      if (owner.toString() === req.user._id) {
+        Card.findByIdAndDelete(req.params.cardId).then((card) => {
+          res.status(200).send(card);
+        });
+      } else {
+        throw new ForbiddenErr('Вы не можете удалить чужую карточку');
       }
-      res.status(200).send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(ERR_BAD_REQUEST).send({
-          message: 'Данные введены некорректно',
-        });
+        next(new BadRequestErr('Невозможно удалить карточку'));
+      } else {
+        next(err);
       }
-      return res.status(ERR_DEFAULT).send({ message: 'Что-то пошло не так' });
     });
 };
 
-module.exports.likeCard = (req, res) => {
+module.exports.likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
@@ -63,40 +65,36 @@ module.exports.likeCard = (req, res) => {
   )
     .then((card) => {
       if (!card) {
-        res.status(ERR_NOT_FOUND).send({ message: 'Карточка не найдена' });
-        return;
+        throw new NotFoundErr('Карточка не найдена');
       }
       res.status(200).send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(ERR_BAD_REQUEST).send({
-          message: 'Данные введены некорректно',
-        });
+        next(new BadRequestErr('Данные введены некорректно'));
+      } else {
+        next(err);
       }
-      return res.status(ERR_DEFAULT).send({ message: 'Что-то пошло не так' });
     });
 };
 
-module.exports.dislikeCard = (req, res) => {
+module.exports.dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
-    req.params.cardId,
+    req.params.id,
     { $pull: { likes: req.user._id } },
     { new: true },
   )
     .then((card) => {
       if (!card) {
-        res.status(ERR_NOT_FOUND).send({ message: 'Карточка не найдена' });
-        return;
+        throw new NotFoundErr('Карточка не найдена');
       }
       res.status(200).send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(ERR_BAD_REQUEST).send({
-          message: 'Данные введены некорректно',
-        });
+        next(new BadRequestErr('Данные введены некорректно'));
+      } else {
+        next(err);
       }
-      return res.status(ERR_DEFAULT).send({ message: 'Что-то пошло не так' });
     });
 };
