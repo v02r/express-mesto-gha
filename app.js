@@ -20,9 +20,15 @@ mongoose.connect('mongodb://localhost:27017/mestodb');
 
 const errorMiddleware = require('./middlewares/error');
 
+const { requestLogger, errorLogger } = require('./middlewares/logger');
+
+const cors = require('./middlewares/cors')
+
+app.use(requestLogger);
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cors);
 
 app.post('/signin', validateUser, login);
 app.post('/signup', validateUser, createUser);
@@ -35,6 +41,8 @@ app.use('/', require('./routes/cards'));
 app.use(() => {
   throw new NotFoundErr('Страница не найдена');
 });
+
+app.use(errorLogger);
 
 app.use(errors());
 app.use(errorMiddleware);
