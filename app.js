@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const { errors } = require('celebrate');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
-
+require('dotenv').config();
 const bodyParser = require('body-parser');
 
 const { PORT = 3000 } = process.env;
