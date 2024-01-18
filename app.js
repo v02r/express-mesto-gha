@@ -24,8 +24,6 @@ const auth = require('./middlewares/auth');
 
 const NotFoundErr = require('./errors/NotFoundErr');
 
-mongoose.connect('mongodb://localhost:27017/mestodb');
-
 const errorMiddleware = require('./middlewares/error');
 
 const { requestLogger, errorLogger } = require('./middlewares/logger');
@@ -52,6 +50,14 @@ app.use(errorLogger);
 app.use(errors());
 app.use(errorMiddleware);
 
-app.listen(PORT, () => {
-  console.log(`Server starts on ${PORT}`);
-});
+async function main() {
+  await mongoose.connect('mongodb://127.0.0.1/mestodb', {
+    useNewUrlParser: true,
+  }).catch(err => console.log(err));
+  console.log('Connected to db');
+  await app.listen(PORT, () => {
+    console.log(`App listening on port ${PORT}`);
+  });
+}
+
+main();
